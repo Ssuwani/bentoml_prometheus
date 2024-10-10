@@ -1,0 +1,17 @@
+service: "service:svc"
+
+labels:
+  owner: jangsuwan
+  framework: pytorch
+
+include:
+  - "*.py"
+
+python:
+  packages:
+    - torch
+    - numpy
+    - pillow
+
+models:
+  - fashion_mnist_model:latest

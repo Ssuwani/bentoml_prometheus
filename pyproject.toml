@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "bentoml-prometheus"
+version = "0.1.0"
+description = ""
+authors = ["suwan.jang"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+torch = "^2.4.1"
+torchvision = "^0.19.1"
+bentoml = "^1.3.7"
+tqdm = "^4.66.5"
+locust = "^2.31.8"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
