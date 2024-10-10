@@ -1,6 +1,6 @@
 # BentoML로 패키징하여 배포하고 Prometheus로 모니터링하기
 
-*블로그에서 필요한 코드들은 https://github.com/ssuwani 에 정리해두었습니다.*
+*블로그에서 필요한 코드들은 https://github.com/Ssuwani/bentoml_prometheus 에 정리해두었습니다.*
 
 ## 0. 들어가며
 
@@ -54,7 +54,7 @@ torchvision의 datasets로부터 fashionMNIST 데이터셋을 가져왔는데 �
 - download: 데이터가 없을 경우 다운로드 여부
 - transform: 데이터 변환 함수
 
-저는 아래와 같이 다운받아졌습니다.
+저는 아래와 같이 데이터셋이 준비되었습니다.
 ```
 data/
 └── FashionMNIST
@@ -69,14 +69,14 @@ data/
         └── train-labels-idx1-ubyte.gz
 ```
 
-저희는 지금까지 Dataset을 다운받았습니다. 이로부터 DataLoader를 정의해야 합니다. 간단히 정의할 수 있습니다.
+지금까지 Dataset을 다운받았습니다. 이로부터 DataLoader를 정의해야 합니다. 간단히 정의할 수 있습니다.
 ```python
 from torch.utils.data import DataLoader
 
 batch_size = 64
 train_dataloader = DataLoader(training_data, batch_size=batch_size)
 ```
-DataLoader는 Iterable 한 객체라고 말씀드렸습니다. batch_size를 지정하지 않으면 1개씩 데이터를 가져오는데 이는 모델 학습에 매우 비효율적입니다. 적절히 메모리 크기를 고려해서 batch_size를 정해야 할 수 있습니다.
+DataLoader는 Iterable 한 객체라고 했습니다. batch_size를 지정하지 않으면 1개씩 데이터를 가져오는데 이는 모델 학습에 매우 비효율적입니다. 적절히 메모리 크기를 고려해서 batch_size를 정해야 할 수 있습니다.
 
 ### 1.2. 모델 정의 및 학습
 
@@ -165,6 +165,8 @@ print(f"Accuracy: {(100*correct):>0.1f}%")
 ```
 
 ### 1.4. 전체 코드
+
+https://github.com/Ssuwani/bentoml_prometheus/blob/main/train.py
 
 ```python
 # ./train.py
@@ -306,6 +308,9 @@ runner.run(torch.randn(1, 28, 28))
 Runner가 추론을 할 수 있는 인스턴스임을 알았습니다. 이제 이 Runner를 통해 API를 생성해보겠습니다.
 
 service.py 파일을 생성하겠습니다.
+
+https://github.com/Ssuwani/bentoml_prometheus/blob/main/service.py
+
 ```python
 # ./service.py
 import bentoml
@@ -349,6 +354,8 @@ http://localhost:3000 에 접속하여 모델이 정상적으로 동작하는지
 로컬에서 모델 엔드포인트 생성까지 잘 되었고 테스트해보았습니다. 그런데 저희의 목표는 로컬에서 해당 서비스를 실생하는 게 아니라 컨테이너화하여 배포하는 것입니다.
 
 이를 위해선 Bento 라는 형태로 패키징해야 합니다. 이를 위해선 bentofile.yaml 파일을 생성하고 필요한 항목들을 작성해야 합니다.
+
+https://github.com/Ssuwani/bentoml_prometheus/blob/main/bentofile.yaml
 
 ```yaml
 # bentofile.yaml
@@ -406,7 +413,7 @@ Prometheus는 메트릭을 수집하고 저장하는 역할을 합니다. Grafan
 
 docker compose를 통해 설치해보겠습니다.
 
-docker-compose.yml 파일은 여기에서 확인할 수 있고 중요한 부분은 prometheus/prometheus.yml 파일에 정의된 BentoML Metrics를 Scrape 하는 부분입니다.
+docker-compose.yml 파일은 [여기](https://github.com/Ssuwani/bentoml_prometheus/blob/main/monitoring/docker-compose.yml)에서 확인할 수 있고 중요한 부분은 prometheus/prometheus.yml 파일에 정의된 BentoML Metrics를 Scrape 하는 부분입니다.
 
 모든 리소스가 로컬의 Docker에 의해 실행되고 있으므로 host는 docker 에서 제공하는 dns로 설정했습니다.
 
@@ -434,7 +441,7 @@ docker compose up -d
 
 마지막으로 Prometheus와 Grafana에서 BentoML Metric이 정상 집계되는지 확인합니다.
 
-1. Prometheus에서 Status -> Service Discovery에서 BentoML 확인 ✅  
+1. Prometheus에서 Status -> Service Discovery에서 BentoML 확인
 2. Grafana 로그인 (admin/admin)
 3. Grafana의 Explore 혹은 대시보드 생성하여 `bentoml_` 메트릭 확인
 
